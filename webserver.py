@@ -26,35 +26,20 @@ def sock(port):
     print('Server port: ', SERVER_PORT)
     
     # Create socket
+
+    # SERVER
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
     server_socket.bind((SERVER_HOST, SERVER_PORT))
-    #server_addr = (SERVER_HOST,SERVER_PORT)
-    #server_socket.connect(server_addr)
-
-    #try:
-        # Open image
-    #    image = open(image, 'you-got-this')
-    #    bytes = image.read()
-    #    size = len(bytes)
-
-        # Send image size to server
-    #   server_socket.sendall("Size: ", size)
-    #   answer = server_socket,recv(4096)
-    #   print('Answer: %s' % answer)
-        
-    #   if answer == 'GOT IMAGE':
-    #       sock.sendall("BYE BYE")
-    #       print('Image successfully sent to server')
-    #   image.close
-
     server_socket.listen(1)
     print('Listening on port: ', SERVER_PORT)
+    
+    # CLIENT
     while True:
         # Wait for client connections
         client_connection, client_address = server_socket.accept()
         # Get the client request
-        request = client_connection.recv(1024).decode()
+        request = client_connection.recv(1024).decode('utf-8')
         print(request)
         # Split request from spaces
         str_list = request.split(' ')
@@ -68,20 +53,20 @@ def sock(port):
         sentFile = sentFile.lstrip('/')
         if (sentFile == ''):
             # index file loaded as default
-            sentFile = 'index.html'
+            sentFile = 'you-got-this-meme.jpg'
         try:
             file = open(sentFile, 'rb')
             response = file.read()
             file.close()
-
+            # Send HTTP response
             header = 'HTTP1.1 200 OK\n'
 
-            if (sentFile.endswith(".png")):
+            if (sentFile.endswith(".jpg")):
+                filetype = 'image/jpg'
+            elif (sentFile.endswith(".png")):
                 filetype = 'image/png'
-            elif (sentFile.endswith(".css")):
-                filetype = 'text/css'
-            else:
-                filetype = 'text/html'
+            elif (sentFile.endswith(".jpeg")):
+                filetype = 'image/jpeg'
             header += 'Content Type: ' + str(filetype) + '\n\n'
         except:
             header = 'HTTP/1.1 404 Not Found\n\n'
@@ -90,11 +75,11 @@ def sock(port):
         final_response = header.encode('utf-8')
         final_response += response
         client_connection.send(final_response)
-        client_connection.close
+        client_connection.close()
 
     # Close socket
-    server_socket.close
-
+    server_socket.close()
+    # sys.exit()
 
 if __name__ == '__main__':
-	main()
+    main()
